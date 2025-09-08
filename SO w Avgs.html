@@ -1,435 +1,346 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Single Candidate Report w/ Averages</title>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Single Candidate Report w/ Averages</title>
+<meta content="Candidate performance report showing individual scores compared to class averages by learning outcome." name="description"/>
+<meta content="light" name="color-scheme"/>
+<!-- Source Sans Pro (400/400i/600/600i) -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,400;0,600;1,400;1,600&amp;display=swap" rel="stylesheet"/>
 
-    {{- 
-      # Convert entire "TestResult" array to a JSON string
-      TestResultJson = TestResult | ToJson
-    }}
+{{- 
+  # Convert entire "TestResult" array to a JSON string
+  TestResultJson = TestResult | ToJson
+}}
 
-    <script>
-      // Make the entire array of test result objects available in JS
-      window.allTestResult = {{ TestResultJson }};
-    </script>
+<script>
+  // Make the entire array of test result objects available in JS
+  window.allTestResult = {{ TestResultJson }};
+</script>
 
-    <style>
-      /* Basic resets & typography */
-      * {
-        box-sizing: border-box;
-      }
-      body {
-        margin: 0;
-        padding: 0;
-        font-family: "Open Sans", Arial, sans-serif;
-        background-color: #f6f7f8;
-        color: #333;
-      }
+<style>
+    :root {
+      --sp-dark-grey: #265063;
+      --sp-dark-cyan: #176F9B;
+      --sp-cyan: #2099D5;
+      --sp-light-cyan: #BDE3F3;
+      --sp-very-light-cyan: #EEF6FC;
+      --sp-yellow: #F4CA11;
+      --sp-light-yellow: #FDF7B6;
 
-      /* Surpass brand-related colors */
-      :root {
-        --surpass-primary: #0182B5;  /* Dark teal */
-        --surpass-accent:  #00B7E0;  /* Light teal accent */
-        --bg-color:        #f6f7f8;
-        --text-color:      #333;
-      }
+      --bg: #ffffff;
+      --panel: var(--sp-very-light-cyan);
+      --text: #0f172a;
+      --muted: #475569;
+      --accent: var(--sp-cyan);
+      --accent-700: var(--sp-dark-cyan);
+      --border: var(--sp-light-cyan);
+      --card: #ffffff;
+      --radius: 14px;
+      --shadow: 0 10px 25px rgba(2, 6, 23, 0.06);
+      --focus: var(--sp-dark-cyan);
 
-      /* Header with logo + title */
-      header {
-        background: var(--surpass-primary);
-        color: #fff;
-        padding: 1.5rem;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
-      .logo-area {
-        display: flex;
-        align-items: center;
-      }
-      .logo-area img {
-        height: 48px;
-        width: auto;
-        margin-right: 1rem;
-      }
-      header h1 {
-        margin: 0;
-        font-size: 1.6rem;
-      }
+      --base: 16.5px;
+      --h1: 38px;
+      --h2: 26px;
+      --h3: 20px;
+      --measure: 95ch;
 
-      /* Main container (like a “card”) */
-      .wrapper {
-        width: 90%;
-        max-width: 1200px;
-        margin: 0 auto 2rem auto;
-        background: #fff;
-        border-radius: 6px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        padding: 1.5rem;
-      }
+      --logo-min-screen: 35px;
+      --logo-min-print: 7mm;
+      --iso: 16px;
+    }
 
-      h2, h3, h4 {
-        margin: 1rem 0 0.5rem 0;
-      }
-      h2 {
-        color: var(--surpass-primary);
-        font-size: 1.4rem;
-      }
-      h3 {
-        color: var(--surpass-accent);
-        font-size: 1.2rem;
-      }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: "Source Sans Pro", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial;
+      font-weight: 400;
+      font-size: var(--base);
+      line-height: 1.7;
+      color: var(--text);
+      background: var(--bg);
+    }
 
-      /* Info boxes, summary row */
+    :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 6px; }
+    em { font-style: italic; }
+    strong { font-weight: 600; }
+    h1, h2, h3, h4 { font-weight: 600; letter-spacing: -0.01em; margin-top: 0; color: var(--sp-dark-grey); }
+    h1 { font-size: var(--h1); }
+    h2 { font-size: var(--h2); }
+    h3 { font-size: var(--h3); }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Masthead */
+    .masthead {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: clamp(var(--iso), 2vw, 28px);
+      padding: calc(var(--iso) * 0.8) clamp(var(--iso), 2vw, 28px);
+      border-bottom: 1px solid var(--border);
+      background: var(--sp-dark-cyan);
+      color: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .masthead .logo-wrap { display:flex; align-items:center; justify-content:flex-start; padding: calc(var(--iso) * 0.2); }
+    .masthead img.logo { height: clamp(var(--logo-min-screen), 4.2vw, 64px); width: auto; display:block; }
+    @media print { .masthead img.logo { min-height: var(--logo-min-print); } }
+    .masthead .doc-title { display:flex; flex-direction:column; gap: 2px; }
+    .masthead .doc-title h1 { margin: 0; line-height: 1.2; color: #fff; }
+    .masthead .doc-sub { color: rgba(255,255,255,0.85); font-size: 14px; }
+
+    /* Main content */
+    .app {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 24px 96px;
+    }
+    section.card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--card);
+      box-shadow: var(--shadow);
+      padding: 22px;
+      margin-bottom: 20px;
+    }
+    
+    /* Summary boxes */
+    .summary-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .info-box {
+      background: var(--sp-very-light-cyan);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      flex: 1;
+      min-width: 180px;
+    }
+    .info-box h5 {
+      margin: 0 0 4px 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--sp-dark-grey);
+    }
+    .info-box .info-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--sp-dark-cyan);
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 15px;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: var(--sp-very-light-cyan);
+      font-weight: 600;
+      color: var(--sp-dark-grey);
+    }
+    tbody tr:hover {
+      background: rgba(189, 227, 243, 0.1);
+    }
+
+    /* Performance indicators */
+    .legend {
+      background: var(--panel);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+    .legend ul {
+      list-style: none;
+      padding-left: 0;
+      margin: 8px 0 0 0;
+    }
+    .legend li {
+      margin-bottom: 6px;
+    }
+    
+    /* The bar chart container */
+    .range-bar {
+      position: relative;
+      border: 1px solid var(--border);
+      background: #fff;
+      height: 16px;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      overflow: hidden;
+    }
+    /* The fill from min% to max% */
+    .rangeFill {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      background: var(--sp-light-cyan);
+    }
+    /* Markers for candidate & class */
+    .marker {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      pointer-events: none;
+    }
+    .marker.star {
+      color: var(--sp-yellow);
+    }
+    .marker.diamond {
+      color: var(--sp-dark-cyan);
+    }
+    /* Labels under the bar chart */
+    .bar-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      margin: 32px 0;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .footer-logo {
+      height: 30px;
+      width: auto;
+      display: block;
+      margin: 0 auto 8px auto;
+    }
+
+    @media (max-width: 768px) {
       .summary-row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1rem;
-        margin-bottom: 1rem;
+        flex-direction: column;
       }
       .info-box {
-        background: #f9f9f9;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        padding: 0.8rem;
-        flex: 1;
-        min-width: 180px;
-      }
-      .info-box h5 {
-        margin: 0 0 0.3rem 0;
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: #666;
-      }
-      .info-box .info-value {
-        font-size: 1rem;
-        font-weight: 700;
-        color: #333;
-      }
-
-      /* Tables */
-      table {
-        border-collapse: collapse;
         width: 100%;
-        margin: 1rem 0;
       }
-      th, td {
-        text-align: left;
-        padding: 0.6rem 0.5rem;
-        border-bottom: 1px solid #ebebeb;
-      }
-      th {
-        background: #f1f1f1;
-        font-weight: 600;
-        color: #444;
-      }
-      tbody tr:hover {
-        background: #fafafa;
-      }
-      .text-center { text-align: center; }
-
-      /* The bar chart container, showing 0–100 range + min/max fill */
-      .range-bar {
-        position: relative;
-        border: 1px solid #000;  /* black outline */
-        background: #fff;        /* white background */
-        height: 16px;
-        border-radius: 4px;
-        margin-bottom: 4px;      /* space above the 0-50-100 labels */
-      }
-      /* The grayscale fill from min% to max% across all single-candidate performances */
-      .rangeFill {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        background: #ccc;
-      }
-
-      /* Markers for candidate & class, same as before */
-      .marker {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 14px;
-        pointer-events: none;
-      }
-      .marker.star {
-        color: #ffcc00; /* Gold star */
-      }
-      .marker.diamond {
-        color: #0066cc; /* Blue diamond */
-      }
-
-      /* The row of "0 50 100" labels under the bar chart. */
-      .bar-labels {
-        display: flex;
-        justify-content: space-between;
-        font-size: 0.8rem;
-      }
-
-      /* Footer */
-      footer {
-        text-align: center;
-        margin: 2rem 0;
-        font-size: 0.85rem;
-        color: #666;
-      }
-      .footer-logo {
-        height: 30px;
-        width: auto;
-        display: block;
-        margin: 0 auto 0.5rem auto;
-      }
-    </style>
+    }
+    @media print { 
+      body { background: #fff; font-size: 12pt; }
+      section.card { break-inside: avoid; box-shadow: none; }
+      .masthead { position: static; }
+    }
+</style>
 </head>
-<body>
-    <!-- Surpass-like Header -->
-    <header>
-      <div class="logo-area">
-        <img src="https://i0.wp.com/surpass.com/wp-content/uploads/thumb.jpg?fit=1200%2C675&ssl=1" alt="Surpass Logo">
-        <h1>Candidate Performance Overview</h1>
-      </div>
-    </header>
 
-    <!-- Single candidate wrapper -->
-    <div class="wrapper" id="candidateReport">
+<body>
+  <!-- Masthead (Surpass header) -->
+  <div class="masthead" aria-label="Surpass header" role="banner">
+    <div class="logo-wrap">
+      <img class="logo" alt="Surpass — Powering Assessment" src="SurpassPA_logo.png" onerror="this.src='https://i0.wp.com/surpass.com/wp-content/uploads/thumb.jpg?fit=1200%2C675&ssl=1'"/>
+    </div>
+    <div class="doc-title">
+      <h1>Candidate Performance Overview</h1>
+      <div class="doc-sub">Individual performance compared to class averages by learning outcome</div>
+    </div>
+  </div>
+
+  <div class="app">
+    <section class="card" id="candidateReport">
       <!-- We'll populate this area with JS once the page loads -->
       <h2>Loading single-candidate report...</h2>
-    </div>
+    </section>
+  </div>
 
-    <footer>
-      <img class="footer-logo"
-           src="https://i0.wp.com/surpass.com/wp-content/uploads/thumb.jpg?fit=1200%2C675&ssl=1"
-           alt="Surpass Logo">
-      <p>&copy;2025 Surpass Assessment. All Rights Reserved.</p>
-    </footer>
+  <footer>
+    <img class="footer-logo" src="SurpassPA_logo.png" onerror="this.src='https://i0.wp.com/surpass.com/wp-content/uploads/thumb.jpg?fit=1200%2C675&ssl=1'" alt="Surpass Logo">
+    <p>&copy;2025 Surpass Assessment. All Rights Reserved.</p>
+  </footer>
 
-    <script>
-      /**
-       * We'll do the full logic in JS, reusing our prior approach:
-       *   1) "myCandidate" => first element in allTestResult
-       *   2) compute "myCandidate" LO performance
-       *   3) compute "classAverage" LO performance across all test results
-       *   4) build table comparing "myCandidate" vs "classAverage" by LO
-       *   5) arrow/circle logic for how candidate compares
-       *   6) labeled mini bar chart from 0–100
-       *   7) fill from "lowest" to "highest" single-candidate LO% among all test results
-       */
-      window.addEventListener("load", () => {
-        const all = window.allTestResult || [];
-        if(!all.length){
-          document.getElementById("candidateReport").innerHTML = "<p>No data found.</p>";
-          return;
+  <script>
+    /**
+     * We'll do the full logic in JS, reusing our prior approach:
+     *   1) "myCandidate" => first element in allTestResult
+     *   2) compute "myCandidate" LO performance
+     *   3) compute "classAverage" LO performance across all test results
+     *   4) build table comparing "myCandidate" vs "classAverage" by LO
+     *   5) arrow/circle logic for how candidate compares
+     *   6) labeled mini bar chart from 0–100
+     *   7) fill from "lowest" to "highest" single-candidate LO% among all test results
+     */
+    window.addEventListener("load", () => {
+      const all = window.allTestResult || [];
+      if(!all.length){
+        document.getElementById("candidateReport").innerHTML = "<p>No data found.</p>";
+        return;
+      }
+
+      // Identify the single candidate
+      const myCandidate = all[0];
+
+      // Basic candidate info
+      const candidateName = `${myCandidate?.Candidate?.Name?.Forename || ""} ${myCandidate?.Candidate?.Name?.Surname || ""}`.trim();
+      const candidateKeycode = myCandidate?.KeyCode || "N/A";
+      const myCandidateScore = (myCandidate?.UserMarks || 0);
+      const myCandidateTotal = (myCandidate?.TotalMarks || 0);
+      const myCandidatePercent = (myCandidateTotal > 0) ? (myCandidateScore/myCandidateTotal)*100 : 0;
+
+      // Compute overall class average
+      let sumMarks = 0;
+      let sumTotal = 0;
+      all.forEach(r => {
+        sumMarks += (r.UserMarks || 0);
+        sumTotal += (r.TotalMarks || 0);
+      });
+      const classPercent = (sumTotal > 0) ? (sumMarks/sumTotal)*100 : 0;
+
+      // Build a "perCandidateLOMaps" array: each element is an LO map for one test result
+      // e.g. perCandidateLOMaps[0][loVal] -> { correct, total } for test result 0
+      let perCandidateLOMaps = all.map(r => buildLoMapForOneResult(r));
+
+      // Build a "loRangeMap" that tracks the min% and max% for each LO across all single-candidate totals
+      // i.e. we want the lowest and highest single test-taker's LO% for that LO
+      let loRangeMap = {};
+
+      perCandidateLOMaps.forEach(loMap => {
+        for(const loVal in loMap){
+          let data = loMap[loVal];
+          let pct = (data.total > 0) ? (data.correct * 100 / data.total) : 0;
+          if(!loRangeMap[loVal]){
+            loRangeMap[loVal] = { min: 100, max: 0 };
+          }
+          if(pct < loRangeMap[loVal].min){
+            loRangeMap[loVal].min = pct;
+          }
+          if(pct > loRangeMap[loVal].max){
+            loRangeMap[loVal].max = pct;
+          }
         }
-
-        // Identify the single candidate
-        const myCandidate = all[0];
-
-        // Basic candidate info
-        const candidateName = `${myCandidate?.Candidate?.Name?.Forename || ""} ${myCandidate?.Candidate?.Name?.Surname || ""}`.trim();
-        const candidateKeycode = myCandidate?.KeyCode || "N/A";
-        const myCandidateScore = (myCandidate?.UserMarks || 0);
-        const myCandidateTotal = (myCandidate?.TotalMarks || 0);
-        const myCandidatePercent = (myCandidateTotal > 0) ? (myCandidateScore/myCandidateTotal)*100 : 0;
-
-        // Compute overall class average
-        let sumMarks = 0;
-        let sumTotal = 0;
-        all.forEach(r => {
-          sumMarks += (r.UserMarks || 0);
-          sumTotal += (r.TotalMarks || 0);
-        });
-        const classPercent = (sumTotal > 0) ? (sumMarks/sumTotal)*100 : 0;
-
-        // Build a "perCandidateLOMaps" array: each element is an LO map for one test result
-        // e.g. perCandidateLOMaps[0][loVal] -> { correct, total } for test result 0
-        let perCandidateLOMaps = all.map(r => buildLoMapForOneResult(r));
-
-        // Build a "loRangeMap" that tracks the min% and max% for each LO across all single-candidate totals
-        // i.e. we want the lowest and highest single test-taker's LO% for that LO
-        let loRangeMap = {};
-
-        perCandidateLOMaps.forEach(loMap => {
-          for(const loVal in loMap){
-            let data = loMap[loVal];
-            let pct = (data.total > 0) ? (data.correct * 100 / data.total) : 0;
-            if(!loRangeMap[loVal]){
-              loRangeMap[loVal] = { min: 100, max: 0 };
-            }
-            if(pct < loRangeMap[loVal].min){
-              loRangeMap[loVal].min = pct;
-            }
-            if(pct > loRangeMap[loVal].max){
-              loRangeMap[loVal].max = pct;
-            }
-          }
-        });
-
-        // Now, build the single-candidate LO map
-        let myCandidateLOMap = buildLoMapForOneResult(myCandidate);
-
-        // Also build the "classLOMap" for overall LO performance
-        let classLOMap = {};
-        all.forEach(result => {
-          if(result.Sections){
-            result.Sections.forEach(sec => {
-              sec.Items.forEach(item => {
-                const question = item.Question || {};
-                const metas = question.Metadatas || [];
-                let loVal = getLOValue(metas);
-
-                let isCorrect = (item.Mark || 0) >= (question.TotalMark || 0);
-                if(!classLOMap[loVal]){
-                  classLOMap[loVal] = { correct:0, total:0 };
-                }
-                classLOMap[loVal].total++;
-                classLOMap[loVal].correct += (isCorrect ? 1 : 0);
-              });
-            });
-          }
-        });
-
-        // Render
-        const container = document.getElementById("candidateReport");
-        container.innerHTML = "";
-
-        // Candidate summary
-        const heading = document.createElement("h2");
-        heading.textContent = `Candidate Report: KeyCode ${candidateKeycode}`;
-        container.appendChild(heading);
-
-        // Basic summary row
-        let summaryRow = document.createElement("div");
-        summaryRow.className = "summary-row";
-        summaryRow.innerHTML = `
-          <div class="info-box">
-            <h5>Candidate</h5>
-            <div class="info-value">${candidateName || "(No Name)"}</div>
-          </div>
-          <div class="info-box">
-            <h5>My Score</h5>
-            <div class="info-value">${myCandidateScore}/${myCandidateTotal} (${myCandidatePercent.toFixed(1)}%)</div>
-          </div>
-          <div class="info-box">
-            <h5>Class Average</h5>
-            <div class="info-value">${classPercent.toFixed(1)}%</div>
-          </div>
-        `;
-        container.appendChild(summaryRow);
-
-        // LO Performance Title
-        const loTitle = document.createElement("h3");
-        loTitle.textContent = "Performance by Learning Outcome (vs Class Average)";
-        container.appendChild(loTitle);
-
-        // Key/legend above the table
-        let legendDiv = document.createElement("div");
-        legendDiv.style.marginBottom = "1rem";
-        legendDiv.innerHTML = `
-          <strong>Performance Key:</strong>
-          <ul style="list-style:none; padding-left:0; margin:0.5rem 0 0 0;">
-            <li>
-              <span style="color:green;">&#x25B2;</span> – Doing Well, 
-              <span style="color:#fbd10f;">&#x25CF;</span> – Needs Review, 
-              <span style="color:red;">&#x25BC;</span> – Needs Improvement
-            </li>
-            <li>
-              <span style="color:#ffcc00; font-size:14px;">★</span> – Candidate Score, 
-              <span style="color:#0066cc; font-size:14px;">◆</span> – Class Average
-            </li>
-            <li>
-              Bar fill = Range of actual scores (lowest to highest) 
-              achieved by any single candidate for that LO
-            </li>
-          </ul>
-        `;
-        container.appendChild(legendDiv);
-
-        // Build the table
-        let table = document.createElement("table");
-        let thead = document.createElement("thead");
-        thead.innerHTML = `
-          <tr>
-            <th>Learning Outcome</th>
-            <th>My Score</th>
-            <th>Class Avg</th>
-            <th style="width:240px;">Visualization</th>
-          </tr>
-        `;
-        table.appendChild(thead);
-
-        let tbody = document.createElement("tbody");
-        // Sort LO keys alphabetically
-        let loKeys = Object.keys(myCandidateLOMap).sort();
-        loKeys.forEach(loKey => {
-          const myData = myCandidateLOMap[loKey];
-          const classData = classLOMap[loKey] || { correct:0, total:0 };
-          const myPct = (myData.total > 0) ? (myData.correct*100/myData.total) : 0;
-          const classPct = (classData.total > 0) ? (classData.correct*100/classData.total) : 0;
-
-          // Arrow/circle logic
-          const diff = myPct - classPct;
-          let symbolHtml = "";
-          if(diff > 0) {
-            // outperforms
-            symbolHtml = `<span style="color: green;">&#x25B2;</span>`;
-          } else {
-            const absDiff = Math.abs(diff);
-            if(absDiff <= 10) {
-              symbolHtml = `<span style="color: #fbd10f;">&#x25CF;</span>`;
-            } else {
-              symbolHtml = `<span style="color: red;">&#x25BC;</span>`;
-            }
-          }
-
-          // Range fill
-          let rangeObj = loRangeMap[loKey];
-          let rangeMin = rangeObj ? rangeObj.min : 0;
-          let rangeMax = rangeObj ? rangeObj.max : 0;
-          // Ensure it doesn’t go below 0 or above 100 in any edge case
-          if(rangeMin < 0) rangeMin = 0;
-          if(rangeMax > 100) rangeMax = 100;
-
-          // The bar includes:
-          // - a gray "rangeFill" from min% to (max% - min%) wide
-          // - star at myPct
-          // - diamond at classPct
-          let barHtml = `
-            <div class="range-bar">
-              <div class="rangeFill" style="left:${rangeMin}%; width:${rangeMax - rangeMin}%;"></div>
-              <span class="marker star" style="left:${myPct}%;">★</span>
-              <span class="marker diamond" style="left:${classPct}%;">◆</span>
-            </div>
-            <div class="bar-labels">
-              <span>0</span>
-              <span>50</span>
-              <span>100</span>
-            </div>
-          `;
-
-          let row = document.createElement("tr");
-          row.innerHTML = `
-            <td>${loKey}</td>
-            <td>
-              ${myPct.toFixed(1)}% (${myData.correct}/${myData.total})
-              &nbsp;${symbolHtml}
-            </td>
-            <td>${classPct.toFixed(1)}% (${classData.correct}/${classData.total})</td>
-            <td>${barHtml}</td>
-          `;
-          tbody.appendChild(row);
-        });
-        table.appendChild(tbody);
-        container.appendChild(table);
       });
 
-      /**
-       * Utility to build an LO map for a single test result
-       * -> { LOVal => {correct, total} }
-       */
-      function buildLoMapForOneResult(result) {
-        let map = {};
+      // Now, build the single-candidate LO map
+      let myCandidateLOMap = buildLoMapForOneResult(myCandidate);
+
+      // Also build the "classLOMap" for overall LO performance
+      let classLOMap = {};
+      all.forEach(result => {
         if(result.Sections){
           result.Sections.forEach(sec => {
             sec.Items.forEach(item => {
@@ -438,26 +349,184 @@
               let loVal = getLOValue(metas);
 
               let isCorrect = (item.Mark || 0) >= (question.TotalMark || 0);
-              if(!map[loVal]){
-                map[loVal] = { correct:0, total:0 };
+              if(!classLOMap[loVal]){
+                classLOMap[loVal] = { correct:0, total:0 };
               }
-              map[loVal].total++;
-              map[loVal].correct += (isCorrect ? 1 : 0);
+              classLOMap[loVal].total++;
+              classLOMap[loVal].correct += (isCorrect ? 1 : 0);
             });
           });
         }
-        return map;
-      }
+      });
 
-      /**
-       * Utility to extract the "LO" metadata from question metadatas
-       * If none found, returns "N/A"
-       */
-      function getLOValue(metadatas){
-        if(!metadatas || !Array.isArray(metadatas)) return "N/A";
-        let found = metadatas.find(m => m.Name === "LO");
-        return (found && found.Value) ? found.Value : "N/A";
+      // Render
+      const container = document.getElementById("candidateReport");
+      container.innerHTML = "";
+
+      // Candidate summary
+      const heading = document.createElement("h2");
+      heading.textContent = `Candidate Report: KeyCode ${candidateKeycode}`;
+      container.appendChild(heading);
+
+      // Basic summary row
+      let summaryRow = document.createElement("div");
+      summaryRow.className = "summary-row";
+      summaryRow.innerHTML = `
+        <div class="info-box">
+          <h5>Candidate</h5>
+          <div class="info-value">${candidateName || "(No Name)"}</div>
+        </div>
+        <div class="info-box">
+          <h5>My Score</h5>
+          <div class="info-value">${myCandidateScore}/${myCandidateTotal} (${myCandidatePercent.toFixed(1)}%)</div>
+        </div>
+        <div class="info-box">
+          <h5>Class Average</h5>
+          <div class="info-value">${classPercent.toFixed(1)}%</div>
+        </div>
+      `;
+      container.appendChild(summaryRow);
+
+      // LO Performance Title
+      const loTitle = document.createElement("h3");
+      loTitle.textContent = "Performance by Learning Outcome";
+      container.appendChild(loTitle);
+
+      // Key/legend above the table
+      let legendDiv = document.createElement("div");
+      legendDiv.className = "legend";
+      legendDiv.innerHTML = `
+        <strong>Performance Key:</strong>
+        <ul>
+          <li>
+            <span style="color:var(--sp-cyan);">&#x25B2;</span> – Doing Well, 
+            <span style="color:var(--sp-yellow);">&#x25CF;</span> – Needs Review, 
+            <span style="color:#e53e3e;">&#x25BC;</span> – Needs Improvement
+          </li>
+          <li>
+            <span style="color:var(--sp-yellow); font-size:14px;">★</span> – Candidate Score, 
+            <span style="color:var(--sp-dark-cyan); font-size:14px;">◆</span> – Class Average
+          </li>
+          <li>
+            Bar fill = Range of actual scores (lowest to highest) 
+            achieved by any single candidate for that learning outcome
+          </li>
+        </ul>
+      `;
+      container.appendChild(legendDiv);
+
+      // Build the table
+      let table = document.createElement("table");
+      let thead = document.createElement("thead");
+      thead.innerHTML = `
+        <tr>
+          <th>Learning Outcome</th>
+          <th>My Score</th>
+          <th>Class Avg</th>
+          <th style="width:240px;">Visualization</th>
+        </tr>
+      `;
+      table.appendChild(thead);
+
+      let tbody = document.createElement("tbody");
+      // Sort LO keys alphabetically
+      let loKeys = Object.keys(myCandidateLOMap).sort();
+      loKeys.forEach(loKey => {
+        const myData = myCandidateLOMap[loKey];
+        const classData = classLOMap[loKey] || { correct:0, total:0 };
+        const myPct = (myData.total > 0) ? (myData.correct*100/myData.total) : 0;
+        const classPct = (classData.total > 0) ? (classData.correct*100/classData.total) : 0;
+
+        // Arrow/circle logic
+        const diff = myPct - classPct;
+        let symbolHtml = "";
+        if(diff > 0) {
+          // outperforms
+          symbolHtml = `<span style="color: var(--sp-cyan);">&#x25B2;</span>`;
+        } else {
+          const absDiff = Math.abs(diff);
+          if(absDiff <= 10) {
+            symbolHtml = `<span style="color: var(--sp-yellow);">&#x25CF;</span>`;
+          } else {
+            symbolHtml = `<span style="color: #e53e3e;">&#x25BC;</span>`;
+          }
+        }
+
+        // Range fill
+        let rangeObj = loRangeMap[loKey];
+        let rangeMin = rangeObj ? rangeObj.min : 0;
+        let rangeMax = rangeObj ? rangeObj.max : 0;
+        // Ensure it doesn't go below 0 or above 100 in any edge case
+        if(rangeMin < 0) rangeMin = 0;
+        if(rangeMax > 100) rangeMax = 100;
+
+        // The bar includes:
+        // - a fill from min% to (max% - min%) wide
+        // - star at myPct
+        // - diamond at classPct
+        let barHtml = `
+          <div class="range-bar">
+            <div class="rangeFill" style="left:${rangeMin}%; width:${rangeMax - rangeMin}%;"></div>
+            <span class="marker star" style="left:${myPct}%;">★</span>
+            <span class="marker diamond" style="left:${classPct}%;">◆</span>
+          </div>
+          <div class="bar-labels">
+            <span>0</span>
+            <span>50</span>
+            <span>100</span>
+          </div>
+        `;
+
+        let row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${loKey}</td>
+          <td>
+            ${myPct.toFixed(1)}% (${myData.correct}/${myData.total})
+            &nbsp;${symbolHtml}
+          </td>
+          <td>${classPct.toFixed(1)}% (${classData.correct}/${classData.total})</td>
+          <td>${barHtml}</td>
+        `;
+        tbody.appendChild(row);
+      });
+      table.appendChild(tbody);
+      container.appendChild(table);
+    });
+
+    /**
+     * Utility to build an LO map for a single test result
+     * -> { LOVal => {correct, total} }
+     */
+    function buildLoMapForOneResult(result) {
+      let map = {};
+      if(result.Sections){
+        result.Sections.forEach(sec => {
+          sec.Items.forEach(item => {
+            const question = item.Question || {};
+            const metas = question.Metadatas || [];
+            let loVal = getLOValue(metas);
+
+            let isCorrect = (item.Mark || 0) >= (question.TotalMark || 0);
+            if(!map[loVal]){
+              map[loVal] = { correct:0, total:0 };
+            }
+            map[loVal].total++;
+            map[loVal].correct += (isCorrect ? 1 : 0);
+          });
+        });
       }
-    </script>
+      return map;
+    }
+
+    /**
+     * Utility to extract the "LO" metadata from question metadatas
+     * If none found, returns "N/A"
+     */
+    function getLOValue(metadatas){
+      if(!metadatas || !Array.isArray(metadatas)) return "N/A";
+      let found = metadatas.find(m => m.Name === "LO");
+      return (found && found.Value) ? found.Value : "N/A";
+    }
+  </script>
 </body>
 </html>
