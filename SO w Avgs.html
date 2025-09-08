@@ -1,254 +1,186 @@
-<!DOCTYPE html>
+<?xml version="1.0" encoding="utf-8" ?>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Single Candidate Report w/ Averages</title>
-<meta content="Detailed candidate performance report with class averages and learning outcome analysis." name="description"/>
-<meta content="light" name="color-scheme"/>
+    <title>Single Candidate Report w/ Averages</title>
 
-{{- 
-  # Convert entire "TestResult" array to a JSON string
-  TestResultJson = TestResult | ToJson
-}}
+    {{- 
+      # Convert entire "TestResult" array to a JSON string
+      TestResultJson = TestResult | ToJson
+    }}
 
-<script>
-  // Make the entire array of test result objects available in JS
-  window.allTestResult = {{ TestResultJson }};
-</script>
+    <script>
+      // Make the entire array of test result objects available in JS
+      window.allTestResult = {{ TestResultJson }};
+    </script>
 
-<!-- Source Sans Pro (400/400i/600/600i) -->
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet"/>
+    <style>
+      /* Basic resets & typography */
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "Open Sans", Arial, sans-serif;
+        background-color: #f6f7f8;
+        color: #333;
+      }
 
-<style>
-    :root {
-      --sp-dark-grey: #265063;
-      --sp-dark-cyan: #176F9B;
-      --sp-cyan: #2099D5;
-      --sp-light-cyan: #BDE3F3;
-      --sp-very-light-cyan: #EEF6FC;
-      --sp-yellow: #F4CA11;
-      --sp-light-yellow: #FDF7B6;
+      /* Surpass brand-related colors */
+      :root {
+        --surpass-primary: #0182B5;  /* Dark teal */
+        --surpass-accent:  #00B7E0;  /* Light teal accent */
+        --bg-color:        #f6f7f8;
+        --text-color:      #333;
+      }
 
-      --bg: #ffffff;
-      --panel: var(--sp-very-light-cyan);
-      --text: #0f172a;
-      --muted: #475569;
-      --accent: var(--sp-cyan);
-      --accent-700: var(--sp-dark-cyan);
-      --border: var(--sp-light-cyan);
-      --card: #ffffff;
-      --radius: 14px;
-      --shadow: 0 10px 25px rgba(2, 6, 23, 0.06);
-      --focus: var(--sp-dark-cyan);
+      /* Header with logo + title */
+      header {
+        background: var(--surpass-primary);
+        color: #fff;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .logo-area {
+        display: flex;
+        align-items: center;
+      }
+      .logo-area img {
+        height: 48px;
+        width: auto;
+        margin-right: 1rem;
+      }
+      header h1 {
+        margin: 0;
+        font-size: 1.6rem;
+      }
 
-      --base: 16.5px;
-      --h1: 38px;
-      --h2: 26px;
-      --h3: 20px;
-      --measure: 95ch;
+      /* Main container (like a “card”) */
+      .wrapper {
+        width: 90%;
+        max-width: 1200px;
+        margin: 0 auto 2rem auto;
+        background: #fff;
+        border-radius: 6px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        padding: 1.5rem;
+      }
 
-      --logo-min-screen: 35px;
-      --logo-min-print: 7mm;
-      --iso: 16px;
-    }
+      h2, h3, h4 {
+        margin: 1rem 0 0.5rem 0;
+      }
+      h2 {
+        color: var(--surpass-primary);
+        font-size: 1.4rem;
+      }
+      h3 {
+        color: var(--surpass-accent);
+        font-size: 1.2rem;
+      }
 
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
-      margin: 0;
-      font-family: "Source Sans Pro", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial;
-      font-weight: 400;
-      font-size: var(--base);
-      line-height: 1.7;
-      color: var(--text);
-      background: var(--bg);
-    }
+      /* Info boxes, summary row */
+      .summary-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+      .info-box {
+        background: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 0.8rem;
+        flex: 1;
+        min-width: 180px;
+      }
+      .info-box h5 {
+        margin: 0 0 0.3rem 0;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #666;
+      }
+      .info-box .info-value {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #333;
+      }
 
-    :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 6px; }
-    em { font-style: italic; }
-    strong { font-weight: 600; }
-    h1, h2, h3, h4 { font-weight: 600; letter-spacing: -0.01em; margin-top: 0; color: var(--sp-dark-grey); }
-    h1 { font-size: var(--h1); }
-    h2 { font-size: var(--h2); }
-    h3 { font-size: var(--h3); }
+      /* Tables */
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 1rem 0;
+      }
+      th, td {
+        text-align: left;
+        padding: 0.6rem 0.5rem;
+        border-bottom: 1px solid #ebebeb;
+      }
+      th {
+        background: #f1f1f1;
+        font-weight: 600;
+        color: #444;
+      }
+      tbody tr:hover {
+        background: #fafafa;
+      }
+      .text-center { text-align: center; }
 
-    a { color: var(--accent); text-decoration: none; }
-    a:hover { text-decoration: underline; }
+      /* The bar chart container, showing 0–100 range + min/max fill */
+      .range-bar {
+        position: relative;
+        border: 1px solid #000;  /* black outline */
+        background: #fff;        /* white background */
+        height: 16px;
+        border-radius: 4px;
+        margin-bottom: 4px;      /* space above the 0-50-100 labels */
+      }
+      /* The grayscale fill from min% to max% across all single-candidate performances */
+      .rangeFill {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        background: #ccc;
+      }
 
-    /* Masthead */
-    .masthead {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      align-items: center;
-      gap: clamp(var(--iso), 2vw, 28px);
-      padding: calc(var(--iso) * 0.8) clamp(var(--iso), 2vw, 28px);
-      border-bottom: 1px solid var(--border);
-      background: #fff;
-      position: sticky;
-      top: 0;
-      z-index: 50;
-    }
-    .masthead .logo-wrap { display:flex; align-items:center; justify-content:flex-start; padding: calc(var(--iso) * 0.2); }
-    .masthead img.logo { height: clamp(var(--logo-min-screen), 4.2vw, 64px); width: auto; display:block; }
-    @media print { .masthead img.logo { min-height: var(--logo-min-print); } }
-    .masthead .doc-title { display:flex; flex-direction:column; gap: 2px; }
-    .masthead .doc-title h1 { margin: 0; line-height: 1.2; }
-    .masthead .doc-sub { color: var(--muted); font-size: 14px; }
+      /* Markers for candidate & class, same as before */
+      .marker {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 14px;
+        pointer-events: none;
+      }
+      .marker.star {
+        color: #ffcc00; /* Gold star */
+      }
+      .marker.diamond {
+        color: #0066cc; /* Blue diamond */
+      }
 
-    /* Layout */
-    .app {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 32px;
-      max-width: 1680px;
-      margin: 0 auto;
-      padding: 20px 24px 96px;
-    }
+      /* The row of "0 50 100" labels under the bar chart. */
+      .bar-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+      }
 
-    .main { min-width: 0; }
-    section.card {
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      background: var(--card);
-      box-shadow: var(--shadow);
-      padding: 22px;
-    }
-    .prose p { margin: 10px 0; max-width: var(--measure); }
-    .grid-2 { display: grid; grid-template-columns: 1.25fr 1fr; gap: 24px; }
-    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-    .kvs { display:grid; grid-template-columns: 240px 1fr; gap:12px; }
-    .callout { border-left: 4px solid var(--accent); background: linear-gradient(180deg, rgba(32,153,213,0.10), transparent); border-radius: 10px; padding: 12px 14px; margin: 12px 0; max-width: var(--measure); }
-
-    /* Info boxes, summary row */
-    .summary-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-    .info-box {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px;
-    }
-    .info-box h5 {
-      margin: 0 0 8px 0;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .info-box .info-value {
-      font-size: 18px;
-      font-weight: 600;
-      color: var(--sp-dark-grey);
-    }
-
-    /* Tables */
-    table { 
-      width: 100%; 
-      border-collapse: collapse; 
-      margin: 12px 0; 
-      font-size: 15px; 
-    }
-    th, td { 
-      border: 1px solid var(--border); 
-      padding: 8px 10px; 
-      text-align: left; 
-      vertical-align: top; 
-    }
-    th { 
-      background: var(--sp-very-light-cyan); 
-      font-weight: 600;
-      color: var(--sp-dark-grey);
-    }
-    tbody tr:hover {
-      background: var(--panel);
-    }
-    .text-center { text-align: center; }
-
-    /* The bar chart container, showing 0–100 range + min/max fill */
-    .range-bar {
-      position: relative;
-      border: 1px solid var(--border);
-      background: #fff;
-      height: 16px;
-      border-radius: 8px;
-      margin-bottom: 6px;
-      overflow: hidden;
-    }
-    /* The grayscale fill from min% to max% across all single-candidate performances */
-    .rangeFill {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      background: var(--sp-light-cyan);
-      opacity: 0.7;
-    }
-
-    /* Markers for candidate & class, same as before */
-    .marker {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 14px;
-      pointer-events: none;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-    }
-    .marker.star {
-      color: var(--sp-yellow);
-    }
-    .marker.diamond {
-      color: var(--sp-dark-cyan);
-    }
-
-    /* The row of "0 50 100" labels under the bar chart. */
-    .bar-labels {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    /* Performance indicators */
-    .performance-key {
-      background: var(--panel);
-      border-radius: var(--radius);
-      padding: 16px;
-      margin-bottom: 24px;
-    }
-    .performance-key h4 {
-      margin: 0 0 12px 0;
-      color: var(--sp-dark-grey);
-    }
-    .performance-key ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 8px;
-    }
-    .performance-key li {
-      font-size: 14px;
-      color: var(--text);
-    }
-
-    @media (max-width: 1400px) {
-      .app { max-width: 1200px; gap: 28px; }
-      .grid-2 { grid-template-columns: 1fr; }
-      .summary-row { grid-template-columns: 1fr; }
-    }
-    @media print { 
-      .masthead { display: none !important; } 
-      body { background: #fff; font-size: 12pt; } 
-      section.card { break-inside: avoid; } 
-    }
+      /* Footer */
+      footer {
+        text-align: center;
+        margin: 2rem 0;
+        font-size: 0.85rem;
+        color: #666;
+      }
+      .footer-logo {
+        height: 30px;
+        width: auto;
+        display: block;
+        margin: 0 auto 0.5rem auto;
+      }
     </style>
 </head>
 <body>
