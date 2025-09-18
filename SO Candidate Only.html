@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Single Candidate Report</title>
+<meta content="Candidate performance report showing individual scores by learning outcome." name="description"/>
+<meta content="light" name="color-scheme"/>
+<!-- Source Sans Pro (400/400i/600/600i) -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,400;0,600;1,400;1,600&amp;display=swap" rel="stylesheet"/>
+
+{{- 
+  # Convert entire "TestResult" array to a JSON string
+  TestResultJson = TestResult | ToJson
+}}
+
+<script>
+  // Make the entire array of test result objects available in JS
+  window.allTestResult = {{ TestResultJson }};
+</script>
+
+<style>
+    :root {
+      --sp-dark-grey: #265063;
+      --sp-dark-cyan: #176F9B;
+      --sp-cyan: #2099D5;
+      --sp-light-cyan: #BDE3F3;
+      --sp-very-light-cyan: #EEF6FC;
+      --sp-yellow: #F4CA11;
+      --sp-light-yellow: #FDF7B6;
+
+      --bg: #ffffff;
+      --panel: var(--sp-very-light-cyan);
+      --text: #0f172a;
+      --muted: #475569;
+      --accent: var(--sp-cyan);
+      --accent-700: var(--sp-dark-cyan);
+      --border: var(--sp-light-cyan);
+      --card: #ffffff;
+      --radius: 14px;
+      --shadow: 0 10px 25px rgba(2, 6, 23, 0.06);
+      --focus: var(--sp-dark-cyan);
+
+      --base: 16.5px;
+      --h1: 38px;
+      --h2: 26px;
+      --h3: 20px;
+      --measure: 95ch;
+
+      --logo-min-screen: 35px;
+      --logo-min-print: 7mm;
+      --iso: 16px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: "Source Sans Pro", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial;
+      font-weight: 400;
+      font-size: var(--base);
+      line-height: 1.7;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 6px; }
+    em { font-style: italic; }
+    strong { font-weight: 600; }
+    h1, h2, h3, h4 { font-weight: 600; letter-spacing: -0.01em; margin-top: 0; color: var(--sp-dark-grey); }
+    h1 { font-size: var(--h1); }
+    h2 { font-size: var(--h2); }
+    h3 { font-size: var(--h3); }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Masthead */
+    .masthead {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: clamp(var(--iso), 2vw, 28px);
+      padding: calc(var(--iso) * 0.8) clamp(var(--iso), 2vw, 28px);
+      border-bottom: 1px solid var(--border);
+      background: var(--sp-dark-cyan);
+      color: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .masthead .logo-wrap { display:flex; align-items:center; justify-content:flex-start; padding: calc(var(--iso) * 0.2); }
+    .masthead img.logo { height: clamp(var(--logo-min-screen), 4.2vw, 64px); width: auto; display:block; }
+    @media print { .masthead img.logo { min-height: var(--logo-min-print); } }
+    .masthead .doc-title { display:flex; flex-direction:column; gap: 2px; }
+    .masthead .doc-title h1 { margin: 0; line-height: 1.2; color: #fff; }
+    .masthead .doc-sub { color: rgba(255,255,255,0.85); font-size: 14px; }
+
+    /* Main content */
+    .app {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 24px 96px;
+    }
+    section.card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--card);
+      box-shadow: var(--shadow);
+      padding: 22px;
+      margin-bottom: 20px;
+    }
+    
+    /* Summary boxes */
+    .summary-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .info-box {
+      background: var(--sp-very-light-cyan);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      flex: 1;
+      min-width: 180px;
+    }
+    .info-box h5 {
+      margin: 0 0 4px 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--sp-dark-grey);
+    }
+    .info-box .info-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--sp-dark-cyan);
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 15px;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: var(--sp-very-light-cyan);
+      font-weight: 600;
+      color: var(--sp-dark-grey);
+    }
+    tbody tr:hover {
+      background: rgba(189, 227, 243, 0.1);
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      margin: 32px 0;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .footer-logo {
+      height: 30px;
+      width: auto;
+      display: block;
+      margin: 0 auto 8px auto;
+    }
+
+    @media (max-width: 768px) {
+      .summary-row {
+        flex-direction: column;
+      }
+      .info-box {
+        width: 100%;
+      }
+    }
+    @media print { 
+      body { background: #fff; font-size: 12pt; }
+      section.card { break-inside: avoid; box-shadow: none; }
+      .masthead { position: static; }
+    }
+</style>
+</head>
+
+<body>
+  <!-- Masthead (Surpass header) -->
+  <div class="masthead" aria-label="Surpass header" role="banner">
+    <div class="logo-wrap">
+      <img class="logo" alt="Surpass — Powering Assessment" src="SurpassPA_logo.png" onerror="this.src='https://i0.wp.com/surpass.com/wp-content/uploads/thumb.jpg?fit=1200%2C675&ssl=1'"/>
+    </div>
+    <div class="doc-title">
+      <h1>Candidate Performance Overview</h1>
+      <div class="doc-sub">Individual performance by learning outcome</div>
+    </div>
+  </div>
+
+  <div class="app">
+    <section class="card" id="candidateReport">
+      <!-- We'll populate this area with JS once the page loads -->
+      <h2>Loading single-candidate report...</h2>
+    </section>
+  </div>
+
+  <footer>
+    <img class="footer-logo" src="SurpassPA_logo.png" onerror="this.src='https://i0.wp.com/surpass.com/wp-content/uploads/thumb.jpg?fit=1200%2C675&ssl=1'" alt="Surpass Logo">
+    <p>&copy;2025 Surpass Assessment. All Rights Reserved.</p>
+  </footer>
+
+  <script>
+    /**
+     * Build a simplified report for a single candidate showing overall score
+     * and learning outcome performance without cohort comparisons.
+     */
+    window.addEventListener("load", () => {
+      const container = document.getElementById("candidateReport");
+      const all = window.allTestResult || [];
+      if(!all.length){
+        container.innerHTML = "<p>No data found.</p>";
+        return;
+      }
+
+      // Identify the single candidate from the data feed
+      const myCandidate = all[0];
+
+      // Basic candidate info
+      const candidateName = `${myCandidate?.Candidate?.Name?.Forename || ""} ${myCandidate?.Candidate?.Name?.Surname || ""}`.trim();
+      const candidateKeycode = myCandidate?.KeyCode || "N/A";
+      const myCandidateScore = myCandidate?.UserMarks || 0;
+      const myCandidateTotal = myCandidate?.TotalMarks || 0;
+      const myCandidatePercent = (myCandidateTotal > 0) ? (myCandidateScore / myCandidateTotal) * 100 : 0;
+
+      // Build the candidate's learning outcome map
+      let myCandidateLOMap = buildLoMapForOneResult(myCandidate);
+
+      // Render
+      container.innerHTML = "";
+
+      const heading = document.createElement("h2");
+      heading.textContent = "Candidate Report";
+      container.appendChild(heading);
+
+      let summaryRow = document.createElement("div");
+      summaryRow.className = "summary-row";
+      summaryRow.innerHTML = `
+        <div class="info-box">
+          <h5>Candidate</h5>
+          <div class="info-value">${candidateName || "(No Name)"}</div>
+        </div>
+        <div class="info-box">
+          <h5>Keycode</h5>
+          <div class="info-value">${candidateKeycode}</div>
+        </div>
+        <div class="info-box">
+          <h5>Overall Score</h5>
+          <div class="info-value">${myCandidateScore}/${myCandidateTotal} (${myCandidatePercent.toFixed(1)}%)</div>
+        </div>
+      `;
+      container.appendChild(summaryRow);
+
+      const loTitle = document.createElement("h3");
+      loTitle.textContent = "Results by Learning Outcome";
+      container.appendChild(loTitle);
+
+      const loIntro = document.createElement("p");
+      loIntro.textContent = "The table below summarises this candidate's results for each learning outcome.";
+      container.appendChild(loIntro);
+
+      let table = document.createElement("table");
+      let thead = document.createElement("thead");
+      thead.innerHTML = `
+        <tr>
+          <th>Learning Outcome</th>
+          <th>Correct / Total</th>
+          <th>Percentage</th>
+        </tr>
+      `;
+      table.appendChild(thead);
+
+      let tbody = document.createElement("tbody");
+      let loKeys = Object.keys(myCandidateLOMap).sort();
+
+      if(!loKeys.length){
+        let row = document.createElement("tr");
+        row.innerHTML = `<td colspan="3">No learning outcome data available.</td>`;
+        tbody.appendChild(row);
+      } else {
+        loKeys.forEach(loKey => {
+          const loData = myCandidateLOMap[loKey] || { correct: 0, total: 0 };
+          const correct = loData.correct || 0;
+          const total = loData.total || 0;
+          const pct = total > 0 ? (correct * 100 / total) : null;
+          const pctDisplay = (pct === null) ? "N/A" : `${pct.toFixed(1)}%`;
+
+          let row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${loKey}</td>
+            <td>${correct}/${total}</td>
+            <td>${pctDisplay}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      }
+
+      table.appendChild(tbody);
+      container.appendChild(table);
+    });
+
+    /**
+     * Utility to build an LO map for a single test result
+     * -> { LOVal => {correct, total} }
+     */
+    function buildLoMapForOneResult(result) {
+      let map = {};
+      if(result.Sections){
+        result.Sections.forEach(sec => {
+          sec.Items.forEach(item => {
+            const question = item.Question || {};
+            const metas = question.Metadatas || [];
+            let loVal = getLOValue(metas);
+
+            let isCorrect = (item.Mark || 0) >= (question.TotalMark || 0);
+            if(!map[loVal]){
+              map[loVal] = { correct:0, total:0 };
+            }
+            map[loVal].total++;
+            map[loVal].correct += (isCorrect ? 1 : 0);
+          });
+        });
+      }
+      return map;
+    }
+
+    /**
+     * Utility to extract the "LO" metadata from question metadatas
+     * If none found, returns "N/A"
+     */
+    function getLOValue(metadatas){
+      if(!metadatas || !Array.isArray(metadatas)) return "N/A";
+      let found = metadatas.find(m => m.Name === "LO");
+      return (found && found.Value) ? found.Value : "N/A";
+    }
+  </script>
+</body>
+</html>
