@@ -1,0 +1,431 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<html lang="en">
+<head>
+    <title>Surpass Assessment Report</title>
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+    <meta content="Candidate performance report showing individual scores and learning outcome analysis." name="description"/>
+    <meta content="light" name="color-scheme"/>
+    
+    <!-- Source Sans Pro (400/400i/600/600i) -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,400;0,600;1,400;1,600&amp;display=swap" rel="stylesheet"/>
+    
+    {{-
+      # Minimal debug approach if needed
+      DEBUG = true;
+      _debugMessages = [];
+      func debug
+        if DEBUG == true
+          $message = $0
+          _debugMessages = _debugMessages | array.add "\"" + $message + "\""
+        end
+      end
+    }}
+
+    {{ debug "TestResult.Subject.Name: " + TestResult.Subject.Name }}
+    {{ debug "TestResult.Candidate.Name: " + TestResult.Candidate.Name }}
+    {{ debug "CustomReportTemplate.Name: " + CustomReportTemplate.Name }}
+    <style>
+    :root {
+      --sp-dark-grey: #265063;
+      --sp-dark-cyan: #176F9B;
+      --sp-cyan: #2099D5;
+      --sp-light-cyan: #BDE3F3;
+      --sp-very-light-cyan: #EEF6FC;
+      --sp-yellow: #F4CA11;
+      --sp-light-yellow: #FDF7B6;
+
+      --bg: #ffffff;
+      --panel: var(--sp-very-light-cyan);
+      --text: #0f172a;
+      --muted: #475569;
+      --accent: var(--sp-cyan);
+      --accent-700: var(--sp-dark-cyan);
+      --border: var(--sp-light-cyan);
+      --card: #ffffff;
+      --radius: 14px;
+      --shadow: 0 10px 25px rgba(2, 6, 23, 0.06);
+      --focus: var(--sp-dark-cyan);
+
+      --base: 16.5px;
+      --h1: 38px;
+      --h2: 26px;
+      --h3: 20px;
+      --measure: 95ch;
+
+      --logo-min-screen: 35px;
+      --logo-min-print: 7mm;
+      --iso: 16px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: "Source Sans Pro", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial;
+      font-weight: 400;
+      font-size: var(--base);
+      line-height: 1.7;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 6px; }
+    em { font-style: italic; }
+    strong { font-weight: 600; }
+    h1, h2, h3, h4 { font-weight: 600; letter-spacing: -0.01em; margin-top: 0; color: var(--sp-dark-grey); }
+    h1 { font-size: var(--h1); }
+    h2 { font-size: var(--h2); }
+    h3 { font-size: var(--h3); }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Masthead */
+    .masthead {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: clamp(var(--iso), 2vw, 28px);
+      padding: calc(var(--iso) * 0.8) clamp(var(--iso), 2vw, 28px);
+      border-bottom: 1px solid var(--border);
+      background: #fff;
+      color: var(--sp-dark-grey);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .masthead .logo-wrap { display:flex; align-items:center; justify-content:flex-start; padding: calc(var(--iso) * 0.2); }
+    .masthead img.logo { height: clamp(var(--logo-min-screen), 4.2vw, 64px); width: auto; display:block; }
+    @media print { .masthead img.logo { min-height: var(--logo-min-print); } }
+    .masthead .doc-title { display:flex; flex-direction:column; gap: 2px; }
+    .masthead .doc-title h1 { margin: 0; line-height: 1.2; color: var(--sp-dark-grey); }
+    .masthead .doc-sub { color: var(--muted); font-size: 14px; }
+
+    /* Main content */
+    .app {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 24px 96px;
+    }
+    section.card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--card);
+      box-shadow: var(--shadow);
+      padding: 22px;
+      margin-bottom: 20px;
+    }
+    
+    /* Summary boxes */
+    .summary-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .info-box {
+      background: var(--sp-very-light-cyan);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      flex: 1;
+      min-width: 180px;
+    }
+    .info-box h5 {
+      margin: 0 0 4px 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--sp-dark-grey);
+    }
+    .info-box .info-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--sp-dark-cyan);
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 15px;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: var(--sp-very-light-cyan);
+      font-weight: 600;
+      color: var(--sp-dark-grey);
+    }
+    tbody tr:hover {
+      background: rgba(189, 227, 243, 0.1);
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    /* Performance by LO styling */
+    .loPerformanceTable {
+      margin-top: 2rem;
+    }
+    .progress-bar {
+      background: var(--border);
+      border-radius: 4px;
+      height: 10px;
+      position: relative;
+    }
+    .fill {
+      background: var(--accent);
+      height: 100%;
+      border-radius: 4px;
+      width: 0%;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      margin: 32px 0;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .footer-logo {
+      height: 30px;
+      width: auto;
+      display: block;
+      margin: 0 auto 8px auto;
+    }
+
+    @media (max-width: 768px) {
+      .summary-row {
+        flex-direction: column;
+      }
+      .info-box {
+        min-width: unset;
+      }
+    }
+    @media print { 
+      body { background: #fff; font-size: 12pt; }
+      section.card { break-inside: avoid; box-shadow: none; }
+      .masthead { position: static; }
+    }
+    </style>
+</head>
+
+<body>
+  <!-- Masthead (Surpass header) -->
+  <div class="masthead" aria-label="Surpass header" role="banner">
+    <div class="logo-wrap">
+      <img class="logo" src="https://i0.wp.com/surpass.com/wp-content/uploads/thumb.jpg?fit=1200%2C675&ssl=1" alt="Surpass Logo">
+    </div>
+    <div class="doc-title">
+      <h1>Candidate Performance Overview</h1>
+      <div class="doc-sub">Surpass Assessment Report</div>
+    </div>
+  </div>
+
+  <div class="app">
+    <section class="card">
+      <!-- 1) High-Level Results Summary -->
+      <h3>Results Summary</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Candidate Name</th>
+            <th>Candidate Ref</th>
+            <th>Test Start Date</th>
+            <th>Test Completed Date</th>
+            <th>Result</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{TestResult.Candidate.Name}}</td>
+            <td>{{TestResult.Candidate.Reference}}</td>
+            <td>{{TestResult.StartDate}}</td>
+            <td>{{TestResult.Completion}}</td>
+            <td>
+              {{ if TestResult.Grade==null || TestResult.Grade=="" }}
+                  {{TestResult.AdjustedGrade}}
+              {{ else }}
+                  {{TestResult.Grade}}
+              {{ end }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 2) Overall marks, pass/fail, etc. -->
+      <div class="summary-row">
+        <div class="info-box">
+          <h5>Total Marks</h5>
+          <div class="info-value">{{TestResult.TotalMarks}}</div>
+        </div>
+        <div class="info-box">
+          <h5>User Marks</h5>
+          <div class="info-value">{{TestResult.UserMarks}}</div>
+        </div>
+        <div class="info-box">
+          <h5>Pass Mark</h5>
+          <div class="info-value">{{TestResult.PassMark}}</div>
+        </div>
+        <div class="info-box">
+          <h5>Pass Status</h5>
+          <div class="info-value">
+            {{ if TestResult.Pass==true }}
+              <span style="color:green;">Pass</span>
+            {{ else }}
+              <span style="color:red;">Fail</span>
+            {{ end }}
+          </div>
+        </div>
+        <div class="info-box">
+          <h5>Time Taken</h5>
+          <div class="info-value">{{TestResult.TimeTaken}} / {{TestResult.Duration}}</div>
+        </div>
+      </div>
+
+      <!-- 3) Per-Section Item Details -->
+      {{ for section in TestResult.Sections }}
+        <h4>Section: {{section.Name}}</h4>
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Learning Outcome</th>
+              <th>Mark</th>
+              <th>Attempted</th>
+              <th>Time Taken</th>
+              <th class="text-center">Correct?</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{ for item in section.Items }}
+              {{ loVal="" }}
+              {{ for meta in item.Question.Metadatas }}
+                {{ if meta.Name=="LO" }}
+                  {{ loVal=meta.Value }}
+                {{ end }}
+              {{ end }}
+              {{ if loVal==null || loVal=="" }}
+                {{ loVal="N/A" }}
+              {{ end }}
+
+              {{ isCorrect=false }}
+              {{ if item.Mark==item.Question.TotalMark }}
+                {{ isCorrect=true }}
+              {{ end }}
+
+              <!-- data-lo, data-correct for JS aggregator -->
+              <tr data-lo="{{loVal}}" data-correct="{{ if isCorrect==true }}1{{ else }}0{{ end }}">
+                <td>{{item.Question.Name}}</td>
+                <td>{{loVal}}</td>
+                <td>{{item.Mark}} / {{item.Question.TotalMark}}</td>
+                <td>{{item.Attempted}}</td>
+                <td>{{item.TimeTaken}}</td>
+                <td class="text-center">
+                  {{ if isCorrect==true }}
+                    <i class="fa fa-check" style="color:green;"></i>
+                  {{ else }}
+                    <i class="fa fa-times" style="color:red;"></i>
+                  {{ end }}
+                </td>
+              </tr>
+            {{ end }}
+          </tbody>
+        </table>
+      {{ end }}
+
+      <!-- 4) Performance by LO (Client-Side Aggregation) -->
+      <h3>Performance by Learning Outcome</h3>
+      <table class="loPerformanceTable" id="loTable">
+        <thead>
+          <tr>
+            <th>Learning Outcome</th>
+            <th class="text-center">Correct / Total</th>
+            <th class="text-center">%</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </section>
+  </div>
+
+  <footer>
+    <img class="footer-logo" src="https://i0.wp.com/surpass.com/wp-content/uploads/thumb.jpg?fit=1200%2C675&ssl=1" alt="Surpass Logo">
+    <p>Hello from the '{{CustomReportTemplate.Name}}' report.</p>
+    <p>&copy;2025 Surpass Assessment. All Rights Reserved.</p>
+  </footer>
+
+    <!-- JS: Summaries LO performance with no Scriban arithmetic -->
+    <script>
+    function onLoad(){
+      console.log("onLoad");
+      aggregateLO();
+    }
+    window.onload=onLoad;
+
+    function aggregateLO(){
+      let loMap={};
+      const itemRows=document.querySelectorAll('tr[data-lo]');
+      itemRows.forEach(tr=>{
+        const lo=tr.getAttribute('data-lo');
+        const cValStr=tr.getAttribute('data-correct');
+        const cVal=parseInt(cValStr);
+        if(!loMap[lo]){
+          loMap[lo]={ correct:0, total:0 };
+        }
+        loMap[lo].total++;
+        loMap[lo].correct+=cVal;
+      });
+      // Build rows in #loTable
+      const tbody=document.querySelector('#loTable tbody');
+      tbody.innerHTML='';
+      for(const loKey in loMap){
+        let dt=loMap[loKey];
+        let pct=0;
+        if(dt.total>0){
+          pct=(dt.correct*100)/dt.total;
+        }
+        const row=document.createElement('tr');
+        row.innerHTML=`
+          <td>${loKey}</td>
+          <td class="text-center">${dt.correct} / ${dt.total}</td>
+          <td class="text-center">
+            <div style="display:inline-block; width:40px; text-align:right; margin-right:8px;">
+              ${pct.toFixed(1)}%
+            </div>
+            <div class="progress-bar" style="width:100px; display:inline-block;">
+              <div class="fill" style="width:${pct.toFixed(1)}%;"></div>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(row);
+      }
+    }
+    </script>
+
+    {{- if DEBUG }} 
+      <script type="text/javascript">
+        var debug={{_debugMessages}}
+        window.addEventListener("load",function(){
+          const label='Scriban debug messages';
+          console.group(label);
+          debug.forEach(item=>console.info(item));
+          console.groupEnd(label);
+        });
+      </script>
+    {{ end }}
+</body>
+</html>
